@@ -19,6 +19,12 @@ Button {
   height: 5rem;
 }
 
+.score {
+  display: flex;
+}
+.score p {
+  margin: 2rem;
+}
 .game-row {
   display: block;
   width: 15rem;

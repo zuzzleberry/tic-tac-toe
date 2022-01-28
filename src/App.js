@@ -3,17 +3,30 @@ import "./App.css";
 
 import React from "react";
 
+const emptyMatrix = [
+  [null, null, null],
+  [null, null, null],
+  [null, null, null],
+];
+
 const App = () => {
   const [gameState, setGameState] = React.useState([
     [null, null, null],
     [null, null, null],
     [null, null, null],
   ]);
-
   const [currentPlayer, setCurrentPlayer] = React.useState(1);
   const [winner, setWinner] = React.useState(null);
 
+  const [score, setScore] = React.useState({
+    p1: 0,
+    p2: 0
+  })
+
   const ButtonClicked = (e) => {
+    if (winner) {
+      return;
+    }
     console.log(gameState);
     const row = e.target.parentNode.id;
     const column = e.target.id;
@@ -36,6 +49,20 @@ const App = () => {
     CheckForWin();
   };
 
+  const UpdateScore = (currentPlayer) => {
+    if (currentPlayer === 1) {
+      setScore({
+        ...score,
+        p1: score.p1 += 1
+      })
+    } else {
+      setScore({
+        ...score,
+        p2: score.p2 += 1
+      })
+    }
+  }
+
   const CheckForWin = () => {
     console.log("checking for win");
 
@@ -46,6 +73,7 @@ const App = () => {
       }
       if (row[0] === row[1] && row[0] === row[2]) {
         console.log(" horizontal winner detected");
+        UpdateScore(currentPlayer);
         setWinner(currentPlayer);
         return;
       }
@@ -59,6 +87,7 @@ const App = () => {
         entry !== null
       ) {
         console.log("vertical winner detected");
+        UpdateScore(currentPlayer);
         setWinner(currentPlayer);
         return;
       }
@@ -74,6 +103,7 @@ const App = () => {
         gameState[0][2] === gameState[2][0])
     ) {
       console.log("diagonelly!");
+      UpdateScore(currentPlayer);
       setWinner(currentPlayer);
       return;
     }
@@ -96,10 +126,23 @@ const App = () => {
     }
   };
 
+  const NewGame = () => {
+    setGameState([
+      [null, null, null],
+      [null, null, null],
+      [null, null, null],
+    ]);
+    setWinner(null)
+  };
+
   return (
     <div className="App">
       <header className="App-header">
         tic tac toe
+        <div className="score">
+          <p>Player 1: {score.p1}</p>
+          <p>Player 2: {score.p2}</p>
+        </div>
         {gameState.map((entry, index) => (
           <div className="game-row" id={index}>
             {gameState[index].map((entry, idx) => (
@@ -111,8 +154,9 @@ const App = () => {
             ))}
           </div>
         ))}
-        <h3>Player {currentPlayer}'s turn</h3>
+        {!winner ? <p>Player {currentPlayer}'s turn</p> : null}
         {winner ? <p>Player {winner} wins!</p> : null}
+        {winner ? <button onClick={NewGame}>Play again</button> : null}
       </header>
     </div>
   );
