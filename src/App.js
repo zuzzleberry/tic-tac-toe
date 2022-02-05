@@ -1,83 +1,60 @@
-import logo from "./logo.svg";
-import "./App.css";
+import { useEffect, useState } from "react"
+import "./App.css"
 
-import React from "react";
+import React from "react"
 
-const emptyMatrix = [
+const EMPTY_MATRIX = [
   [null, null, null],
   [null, null, null],
   [null, null, null],
-];
+]
 
 const App = () => {
-  const [gameState, setGameState] = React.useState([
-    [null, null, null],
-    [null, null, null],
-    [null, null, null],
-  ]);
-  const [currentPlayer, setCurrentPlayer] = React.useState(1);
-  const [winner, setWinner] = React.useState(null);
-
-  const [score, setScore] = React.useState({
+  const [gameState, setGameState] = useState(EMPTY_MATRIX)
+  const [currentPlayer, setCurrentPlayer] = useState(1)
+  const [winner, setWinner] = useState(null)
+  const [score, setScore] = useState({
     p1: 0,
-    p2: 0
+    p2: 0,
   })
 
-  const ButtonClicked = (e) => {
-    if (winner) {
-      return;
-    }
-    console.log(gameState);
-    const row = e.target.parentNode.id;
-    const column = e.target.id;
-    const stateUpdate = [...gameState];
+  useEffect(() => {
+    checkForWin()
+  }, [gameState])
 
-    if (gameState[row][column] !== null) {
-      return;
+  const handleMoveClick = (column, row) => {
+    if (winner || gameState[row][column] !== null) {
+      return
     }
 
-    stateUpdate[row][column] = currentPlayer;
+    setGameState((gameState) => {
+      gameState[row][column] = currentPlayer
+      return [...gameState]
+    })
 
-    setGameState(stateUpdate);
-    if (currentPlayer === 1) {
-      setCurrentPlayer(2);
-    }
-    if (currentPlayer === 2) {
-      setCurrentPlayer(1);
-    }
-
-    CheckForWin();
-  };
-
-  const UpdateScore = (currentPlayer) => {
-    if (currentPlayer === 1) {
-      setScore({
-        ...score,
-        p1: score.p1 += 1
-      })
-    } else {
-      setScore({
-        ...score,
-        p2: score.p2 += 1
-      })
-    }
+    setCurrentPlayer(currentPlayer === 1 ? 2 : 1)
   }
 
-  const CheckForWin = () => {
-    console.log("checking for win");
+  const updateScore = (currentPlayer) => {
+    setScore({
+      ...score,
+      ...(currentPlayer === 1 ? { p1: score.p1 + 1 } : { p2: score.p2 + 1 }),
+    })
+  }
 
+  const checkForWin = () => {
     //check horizontal
     gameState.forEach((row, index) => {
       if (row[0] === null) {
-        return;
+        return
       }
       if (row[0] === row[1] && row[0] === row[2]) {
-        console.log(" horizontal winner detected");
-        UpdateScore(currentPlayer);
-        setWinner(currentPlayer);
-        return;
+        console.log(" horizontal winner detected")
+        updateScore(currentPlayer)
+        setWinner(currentPlayer === 1 ? 2 : 1)
+        return
       }
-    });
+    })
 
     //check vertical
     gameState[0].forEach((entry, index) => {
@@ -86,12 +63,12 @@ const App = () => {
         entry === gameState[2][index] &&
         entry !== null
       ) {
-        console.log("vertical winner detected");
-        UpdateScore(currentPlayer);
-        setWinner(currentPlayer);
-        return;
+        console.log("vertical winner detected")
+        updateScore(currentPlayer)
+        setWinner(currentPlayer === 1 ? 2 : 1)
+        return
       }
-    });
+    })
 
     //check diagonal L & R
     if (
@@ -102,64 +79,55 @@ const App = () => {
         gameState[0][2] === gameState[1][1] &&
         gameState[0][2] === gameState[2][0])
     ) {
-      console.log("diagonelly!");
-      UpdateScore(currentPlayer);
-      setWinner(currentPlayer);
-      return;
+      console.log("diagonelly!")
+      updateScore(currentPlayer)
+      setWinner(currentPlayer === 1 ? 2 : 1)
+      return
     }
-  };
+  }
 
-  const GetClass = (index, idx) => {
-    const row = index;
-    const column = idx;
-
-    if (gameState[row][column] === null) {
-      return "unclicked";
-    }
-
+  const getBoxClassName = (column, row) => {
     if (gameState[row][column] === 1) {
-      return "p1-clicked";
+      return "p1_selected"
     }
 
     if (gameState[row][column] === 2) {
-      return "p2-clicked";
+      return "p2_selected"
     }
-  };
+  }
 
-  const NewGame = () => {
-    setGameState([
-      [null, null, null],
-      [null, null, null],
-      [null, null, null],
-    ]);
+  const newGame = () => {
+    setGameState(EMPTY_MATRIX)
     setWinner(null)
-  };
+  }
 
   return (
     <div className="App">
-      <header className="App-header">
-        tic tac toe
-        <div className="score">
-          <p>Player 1: {score.p1}</p>
-          <p>Player 2: {score.p2}</p>
-        </div>
-        {gameState.map((entry, index) => (
-          <div className="game-row" id={index}>
-            {gameState[index].map((entry, idx) => (
-              <button
-                onClick={ButtonClicked}
-                id={idx}
-                className={GetClass(index, idx)}
-              ></button>
-            ))}
-          </div>
-        ))}
-        {!winner ? <p>Player {currentPlayer}'s turn</p> : null}
-        {winner ? <p>Player {winner} wins!</p> : null}
-        {winner ? <button onClick={NewGame}>Play again</button> : null}
-      </header>
-    </div>
-  );
-};
+      <section className="App-header">
+        <h1>tic tac toe</h1>
 
-export default App;
+        <div className="score">
+          <p style={{ textAlign: "left" }}>Player 1: {score.p1}</p>
+          <p style={{ textAlign: "right" }}>Player 2: {score.p2}</p>
+        </div>
+        <div className="game-board">
+          {gameState.map((entry, column) => (
+            <div className="game-row">
+              {gameState[column].map((entry, row) => (
+                <button
+                  onClick={() => handleMoveClick(column, row)}
+                  className={getBoxClassName(column, row)}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+        {!winner && <p>Player {currentPlayer}'s turn</p>}
+        {winner && <p>Player {winner} wins!</p>}
+        {winner && <button onClick={newGame}>Play again</button>}
+      </section>
+    </div>
+  )
+}
+
+export default App

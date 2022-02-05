@@ -1,3 +1,7 @@
+:root {
+  --font-color: whitesmoke;
+}
+
 .App {
   text-align: center;
 }
@@ -10,20 +14,25 @@
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: var(--font-color);
 }
 
 Button {
   /* display: flex; */
   width: 5rem;
   height: 5rem;
+  background-color: grey;
 }
 
 .score {
   display: flex;
+  justify-content: space-between;
+  width: 15rem;
 }
+
 .score p {
-  margin: 2rem;
+  margin: 0;
+  padding: 8px 0;
 }
 .game-row {
   display: block;
@@ -31,14 +40,10 @@ Button {
   height: 5rem;
 }
 
-.unclicked {
-  background-color: grey;
-}
-
-.p1-clicked {
+.p1_selected {
   background-color: greenyellow;
 }
 
-.p2-clicked {
+.p2_selected {
   background-color: indianred;
 }
